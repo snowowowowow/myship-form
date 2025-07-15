@@ -37,6 +37,39 @@
 <div id="err"></div>
 
 <script>
+const SHEET_ID = '1lRoK7bBqTmGuV8uKgRae1M0KKpA5GYkIEzRuEzjsJls'; // ← 替換這裡！
+
+/** 允許 CORS 跨域的回應 */
+function corsResponse(text) {
+  return ContentService.createTextOutput(text)
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+/** 資料寫入 Google Sheet */
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+    sheet.appendRow([data.name, data.phone, data.store, new Date()]);
+    return corsResponse('OK');
+  } catch (err) {
+    return corsResponse('ERROR: ' + err);
+  }
+}
+
+/** 處理 GET 請求（選填） */
+function doGet() {
+  return corsResponse('GAS ready');
+}
+
+/** 回應預檢請求（CORS OPTIONS） */
+function doOptions() {
+  return corsResponse('');
+}
+
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxzlGl4VlPe1ZuW-lFx5JqVHbEwxhZJ6U6nokSMbdZvttfKxHFN9fx8l1Dhe3VSctmGVQ/exec";
 
 document.getElementById('myForm').addEventListener('submit', async (e) => {
