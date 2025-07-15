@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>賣貨便匯入資料表單</title>
+  <style>
+    body{font-family:sans-serif;padding:2rem;max-width:480px;margin:auto}
+    label{display:block;margin:1rem 0 .3rem}
+    input{width:100%;padding:.6rem;font-size:1rem}
+    button{margin-top:1.2rem;padding:.8rem 1.2rem;font-size:1rem}
+    #msg{margin-top:1rem;color:green}
+    #err{margin-top:1rem;color:red}
+  </style>
+</head>
+<body>
+
+<h2>賣貨便匯入資料</h2>
+
+<form id="myForm">
+  <label>＊取件人姓名
+    <input type="text" name="name" required />
+  </label>
+
+  <label>＊取件人手機
+    <input type="tel" name="phone" pattern="^09\d{8}$" required />
+  </label>
+
+  <label>＊取件門市號碼
+    <input type="text" name="store" pattern="^\d{6}$" required />
+  </label>
+
+  <button type="submit">送出並寫入雲端</button>
+</form>
+
+<div id="msg"></div>
+<div id="err"></div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxKfa3VFwRjoAEuyJ-_HAUA_ZZmA_ONZ3qsEY0VcrsbuV-DdyB11E7d7TjEVFAaoSgonQ/exec";
+
+document.getElementById('myForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    name: form.name.value.trim(),
+    phone: form.phone.value.trim(),
+    store: form.store.value.trim()
+  };
+  try {
+    const res = await fetch(WEBAPP_URL, {
+      method:'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const text = await res.text();
+    if (text === 'OK') {
+      document.getElementById('msg').textContent = '✔ 已成功寫入雲端試算表！';
+      document.getElementById('err').textContent = '';
+      form.reset();
+    } else {
+      throw new Error(text);
+    }
+  } catch (err) {
+    document.getElementById('err').textContent = '❌ 發生錯誤：' + err;
+    document.getElementById('msg').textContent = '';
+  }
+});
+</script>
+</body>
+</html>
